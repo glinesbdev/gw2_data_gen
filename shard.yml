@@ -1,0 +1,13 @@
+name: gw2_data_gen
+version: 0.1.0
+
+authors:
+  - your-name-here <your-email-here>
+
+dependencies:
+  html5:
+    github: naqvis/crystal-html5
+
+crystal: 1.4.0
+
+license: MIT
