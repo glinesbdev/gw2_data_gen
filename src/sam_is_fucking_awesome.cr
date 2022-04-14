@@ -24,7 +24,7 @@ class KlassGuts
   end
 
   private def crystal_type
-    %Q{#{array}#{boolean}#{integer}#{string}#{closer}#{optional}}
+    %Q{\t#{array}#{boolean}#{integer}#{string}#{closer}#{optional}}
   end
 
   private def documentation
@@ -40,7 +40,7 @@ class KlassGuts
   end
 
   private def no_guts_no_glory
-    %Q{\t# #{documentation}\n\tgetter #{method_name} : #{crystal_type}}
+    %Q{# #{documentation}\n\tgetter #{method_name} : #{crystal_type}\n}
   end
 
   private def optional
@@ -131,7 +131,7 @@ class HtmlSection
   end
 
   private def attributes
-    heading.xpath_nodes("../following-sibling::ul[1]")
+    heading.xpath_nodes("../following-sibling::ul[1][not(ul)]/li")
   end
 
   private def no_guts_no_glory
