@@ -40,7 +40,7 @@ class KlassGuts
   end
 
   private def no_guts_no_glory
-    %Q{# #{documentation}\n\tgetter #{method_name} : #{crystal_type}\n}
+    %Q{\t# #{documentation}\n\tgetter #{method_name} : #{crystal_type}\n}
   end
 
   private def optional
@@ -64,6 +64,10 @@ class WikiConverter
     definition
   end
 
+  def write
+    FileWriter.new(self).write
+  end
+
   private def definition
     %Q{require "json"
 
@@ -78,11 +82,11 @@ end
   end
 
   private def pretty_klass_name
-    klass_name.camelcase
+    klass_name.split("/").last.camelcase
   end
   
   private def guts
-    @api_doc_page.sections.map(&.to_s).join("\n")
+    @api_doc_page.sections.join("\n")
   end
 end
 
@@ -112,7 +116,7 @@ class ApiDocPage
   end
 
   private def parsed_sections
-    valid_headings.map { |heading| ApiDocSection.new(heading) }
+    valid_headings.map { |heading| ApiDocSection.new(heading).to_s }
   end
 
   private def valid_headings
@@ -140,11 +144,9 @@ class ApiDocSection
 end
 
 class FileWriter
-  getter klass_name : String
-  property converter : WikiConverter
+  getter converter : WikiConverter
 
-  def initialize(@klass_name)
-    @converter = WikiConverter.new(klass_name)
+  def initialize(@converter)
   end
   
   def write
@@ -156,7 +158,11 @@ class FileWriter
   end
 
   private def dirpath
-    "output/#{path_parts.dup.truncate(path_parts.size - 1, 1).join("/")}"
+    "output/#{dirparts}"
+  end
+
+  private def dirparts
+    path_parts.dup.truncate(path_parts.size - 1, 1).join("/")
   end
 
   private def filename
@@ -177,10 +183,10 @@ class FileWriter
   end
 
   private def path_parts
-    klass_name.split("/")
+    converter.klass_name.split("/")
   end
 
   private def write_file
-    File.write(filepath, @converter.to_s)
+    File.write(filepath, converter.to_s)
   end
 end

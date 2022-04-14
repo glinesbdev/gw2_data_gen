@@ -5,6 +5,6 @@ if ARGV.empty?
   exit
 end
 
-ARGV.each do |klass_name|
-  FileWriter.new(klass_name).write
+ARGV.each do |url_fragment|
+  WikiConverter.new(url_fragment).write
 end
