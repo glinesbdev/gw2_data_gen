@@ -53,11 +53,11 @@ class KlassGuts
 end
 
 class WikiConverter
-  getter klass_name : String
-  property parser   : HtmlParser
+  getter klass_name     : String
+  property api_doc_page : ApiDocPage
 
   def initialize(@klass_name)
-    @parser = HtmlParser.new(klass_name)
+    @api_doc_page = ApiDocPage.new(klass_name)
   end
 
   def to_s
@@ -76,17 +76,17 @@ module Gw2Api
 end
 }
   end
-  
-  private def guts
-    @parser.sections.map(&.to_s).join("\n")
-  end
 
   private def pretty_klass_name
-    klass_name.split("/").last.camelcase
+    klass_name.camelcase
+  end
+  
+  private def guts
+    @api_doc_page.sections.map(&.to_s).join("\n")
   end
 end
 
-class HtmlParser
+class ApiDocPage
   INVALID_HEADINGS = ["Parameters", "Example", "Notes", "References", "Endpoints", "Subobjects", "Other types"]
   URL              = "https://wiki.guildwars2.com/wiki/API:2"
 
@@ -112,7 +112,7 @@ class HtmlParser
   end
 
   private def parsed_sections
-    valid_headings.map { |heading| HtmlSection.new(heading) }
+    valid_headings.map { |heading| ApiDocSection.new(heading) }
   end
 
   private def valid_headings
@@ -120,26 +120,22 @@ class HtmlParser
   end
 end
 
-class HtmlSection
+class ApiDocSection
   getter heading : HTML5::Node
 
   def initialize(@heading)
   end
 
   def to_s
-    no_guts_no_glory
+    parsed_attributes
   end
 
   private def attributes
-    heading.xpath_nodes("../following-sibling::ul[1][not(ul)]/li")
+    heading.xpath_nodes("../following-sibling::ul[1]/li").map(&.inner_text)
   end
 
-  private def no_guts_no_glory
-    attributes.flat_map do |attribute|
-      attribute.inner_text.split("\n").map do |attr|
-        KlassGuts.new(attr).to_s
-      end
-    end.join("\n")
+  private def parsed_attributes
+    attributes.map { |attribute| KlassGuts.new(attribute).to_s }.join("\n")
   end
 end
 
