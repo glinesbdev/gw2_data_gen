@@ -53,10 +53,11 @@ class KlassGuts
 end
 
 class WikiConverter
-  getter klass_name     : String
   property api_doc_page : ApiDocPage
+  getter klass_name     : String
+  getter parser_options : Hash(String, String)
 
-  def initialize(@klass_name)
+  def initialize(@parser_options, @klass_name)
     @api_doc_page = ApiDocPage.new(klass_name)
   end
 
@@ -84,7 +85,7 @@ end
   private def pretty_klass_name
     klass_name.split("/").last.camelcase
   end
-  
+
   private def guts
     @api_doc_page.sections.join("\n")
   end
@@ -148,7 +149,7 @@ class FileWriter
 
   def initialize(@converter)
   end
-  
+
   def write
     make_shit_happen
   end
@@ -158,11 +159,7 @@ class FileWriter
   end
 
   private def dirpath
-    "output/#{dirparts}"
-  end
-
-  private def dirparts
-    path_parts.dup.truncate(path_parts.size - 1, 1).join("/")
+    path_parts.dup.truncate(0..-2).join("/")
   end
 
   private def filename
@@ -183,7 +180,7 @@ class FileWriter
   end
 
   private def path_parts
-    converter.klass_name.split("/")
+    "#{converter.parser_options["output"]}#{converter.klass_name}".split("/").reject(&.blank?)
   end
 
   private def write_file
